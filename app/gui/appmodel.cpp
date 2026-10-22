@@ -39,6 +39,11 @@ QString AppModel::getRunningAppName()
     return nullptr;
 }
 
+QString AppModel::getHostUuid() const
+{
+    return m_Computer ? m_Computer->uuid : QString();
+}
+
 Session* AppModel::createSessionForApp(int appIndex)
 {
     Q_ASSERT(appIndex < m_VisibleApps.count());

@@ -5,6 +5,7 @@ import QtQuick.Controls.Material 2.2
 import AppModel 1.0
 import ComputerManager 1.0
 import SdlGamepadKeyNavigation 1.0
+import StreamingProfileManager 1.0
 
 CenteredGridView {
     property int computerIndex
@@ -222,6 +223,8 @@ CenteredGridView {
                 return
             }
 
+            StreamingProfileManager.applyProfileForApp(appModel.getHostUuid(), model.name)
+
             var component = Qt.createComponent("StreamSegue.qml")
             var segue = component.createObject(stackView, {
                                                    "appName": model.name,
@@ -324,6 +327,15 @@ CenteredGridView {
                 }
                 NavigableMenuItem {
                     parentMenu: appContextMenu
+                    text: qsTr("Set Streaming Profile...")
+                    onTriggered: {
+                        profileAssignmentDialog.appName = model.name
+                        profileAssignmentDialog.open()
+                    }
+                    enabled: !model.running
+                }
+                NavigableMenuItem {
+                    parentMenu: appContextMenu
                     checkable: true
                     checked: model.hidden
                     text: qsTr("Hide Game")
@@ -367,6 +379,7 @@ CenteredGridView {
             if (segueToStream) {
                 // Store the session and app name if we're going to stream after
                 // successfully quitting the old app.
+                StreamingProfileManager.applyProfileForApp(appModel.getHostUuid(), nextAppName)
                 params.nextAppName = nextAppName
                 params.nextSession = appModel.createSessionForApp(nextAppIndex)
             }
@@ -379,6 +392,45 @@ CenteredGridView {
         }
 
         onAccepted: quitApp()
+    }
+
+    NavigableDialog {
+        id: profileAssignmentDialog
+        property string appName: ""
+        property var profileOptions: []
+
+        title: qsTr("Streaming Profile")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        onOpened: {
+            profileOptions = [qsTr("No profile (use current settings)")].concat(StreamingProfileManager.profileNames)
+            profileSelector.model = profileOptions
+            var assignedProfile = StreamingProfileManager.profileForApp(appModel.getHostUuid(), appName)
+            profileSelector.currentIndex = assignedProfile ? Math.max(0, profileSelector.find(assignedProfile)) : 0
+        }
+
+        onAccepted: {
+            if (profileSelector.currentIndex <= 0) {
+                StreamingProfileManager.clearProfileForApp(appModel.getHostUuid(), appName)
+            } else {
+                StreamingProfileManager.assignProfileToApp(appModel.getHostUuid(), appName, profileSelector.currentText)
+            }
+        }
+
+        ColumnLayout {
+            width: Math.max(360, parent.width)
+
+            Label {
+                text: qsTr("Choose a saved streaming profile for %1. It will be applied automatically before this app launches on this host.").arg(profileAssignmentDialog.appName)
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+            }
+
+            AutoResizingComboBox {
+                id: profileSelector
+                Layout.fillWidth: true
+            }
+        }
     }
 
     ScrollBar.vertical: ScrollBar {}

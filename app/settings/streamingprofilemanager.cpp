@@ -2,9 +2,16 @@
 #include "streamingpreferences.h"
 
 #include <QSettings>
+#include <QVariantMap>
 
 namespace {
 constexpr auto kProfilesGroup = "streamingProfiles";
+constexpr auto kAssignmentsKey = "streamingProfileAssignments";
+
+QString assignmentKey(const QString& hostUuid, const QString& appName)
+{
+    return hostUuid + QChar(0x1f) + appName;
+}
 
 void writeProfile(QSettings& settings, const StreamingPreferences* prefs)
 {
@@ -143,4 +150,52 @@ bool StreamingProfileManager::deleteProfile(const QString& name)
 bool StreamingProfileManager::hasProfile(const QString& name) const
 {
     return profileNames().contains(name.trimmed());
+}
+
+QString StreamingProfileManager::profileForApp(const QString& hostUuid, const QString& appName) const
+{
+    if (hostUuid.isEmpty() || appName.isEmpty()) {
+        return QString();
+    }
+
+    QSettings settings;
+    const QVariantMap assignments = settings.value(kAssignmentsKey).toMap();
+    const QString profileName = assignments.value(assignmentKey(hostUuid, appName)).toString();
+    return hasProfile(profileName) ? profileName : QString();
+}
+
+bool StreamingProfileManager::assignProfileToApp(const QString& hostUuid, const QString& appName, const QString& profileName)
+{
+    const QString normalizedProfileName = profileName.trimmed();
+    if (hostUuid.isEmpty() || appName.isEmpty() || !hasProfile(normalizedProfileName)) {
+        emit profileError(tr("Choose an existing profile before assigning it to an app."));
+        return false;
+    }
+
+    QSettings settings;
+    QVariantMap assignments = settings.value(kAssignmentsKey).toMap();
+    assignments.insert(assignmentKey(hostUuid, appName), normalizedProfileName);
+    settings.setValue(kAssignmentsKey, assignments);
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+}
+
+bool StreamingProfileManager::clearProfileForApp(const QString& hostUuid, const QString& appName)
+{
+    if (hostUuid.isEmpty() || appName.isEmpty()) {
+        return false;
+    }
+
+    QSettings settings;
+    QVariantMap assignments = settings.value(kAssignmentsKey).toMap();
+    assignments.remove(assignmentKey(hostUuid, appName));
+    settings.setValue(kAssignmentsKey, assignments);
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+}
+
+bool StreamingProfileManager::applyProfileForApp(const QString& hostUuid, const QString& appName)
+{
+    const QString profileName = profileForApp(hostUuid, appName);
+    return !profileName.isEmpty() && loadProfile(profileName);
 }
