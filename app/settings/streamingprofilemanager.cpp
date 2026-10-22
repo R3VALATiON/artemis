@@ -74,8 +74,9 @@ QStringList StreamingProfileManager::profileNames() const
 {
     QSettings settings;
     settings.beginGroup(kProfilesGroup);
-    const QStringList names = settings.childGroups();
+    QStringList names = settings.childGroups();
     settings.endGroup();
+    names.sort(Qt::CaseInsensitive);
     return names;
 }
 
