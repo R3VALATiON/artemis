@@ -46,6 +46,7 @@
 #include "backend/systemproperties.h"
 #include "streaming/session.h"
 #include "settings/streamingpreferences.h"
+#include "settings/streamingprofilemanager.h"
 #include "gui/sdlgamepadkeynavigation.h"
 #include "backend/clipboardmanager.h"
 #include "backend/servercommandmanager.h"
@@ -729,6 +730,11 @@ int main(int argc, char *argv[])
                                                    "StreamingPreferences",
                                                    [](QQmlEngine* qmlEngine, QJSEngine*) -> QObject* {
                                                        return StreamingPreferences::get(qmlEngine);
+                                                   });
+    qmlRegisterSingletonType<StreamingProfileManager>("StreamingProfileManager", 1, 0,
+                                                   "StreamingProfileManager",
+                                                   [](QQmlEngine*, QJSEngine*) -> QObject* {
+                                                       return StreamingProfileManager::get();
                                                    });
     qmlRegisterSingletonType<ClipboardManager>("ClipboardManager", 1, 0,
                                                "ClipboardManager",
