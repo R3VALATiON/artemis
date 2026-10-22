@@ -18,6 +18,9 @@ public:
 
     void reload();
 
+    // Notify QML after a saved streaming profile updates multiple preferences at once.
+    void notifyStreamingProfileApplied();
+
     enum AudioConfig
     {
         AC_STEREO,
