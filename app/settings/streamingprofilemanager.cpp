@@ -117,6 +117,7 @@ bool StreamingProfileManager::loadProfile(const QString& name)
     readProfile(settings, prefs);
     settings.endGroup();
     prefs->save();
+    prefs->notifyStreamingProfileApplied();
 
     emit profileLoaded(normalizedName);
     return true;
