@@ -206,6 +206,27 @@ void StreamingPreferences::reload()
     }
 }
 
+void StreamingPreferences::notifyStreamingProfileApplied()
+{
+    emit displayModeChanged();
+    emit bitrateChanged();
+    emit unlockBitrateChanged();
+    emit autoAdjustBitrateChanged();
+    emit enableVsyncChanged();
+    emit enableHdrChanged();
+    emit enableYUV444Changed();
+    emit videoCodecConfigChanged();
+    emit videoDecoderSelectionChanged();
+    emit windowModeChanged();
+    emit absoluteMouseModeChanged();
+    emit framePacingChanged();
+    emit useVirtualDisplayChanged();
+    emit enableFractionalRefreshRateChanged();
+    emit customRefreshRateChanged();
+    emit enableResolutionScalingChanged();
+    emit resolutionScaleFactorChanged();
+}
+
 bool StreamingPreferences::retranslate()
 {
     static QTranslator* translator = nullptr;
