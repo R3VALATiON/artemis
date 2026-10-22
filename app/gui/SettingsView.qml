@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.2
 import QtQuick.Window 2.2
 
 import StreamingPreferences 1.0
+import StreamingProfileManager 1.0
 import ComputerManager 1.0
 import SdlGamepadKeyNavigation 1.0
 import SystemProperties 1.0
@@ -937,6 +938,82 @@ Flickable {
                     font.pointSize: 9
                     wrapMode: Text.Wrap
                     color: "#888888"
+                }
+
+                // Named profiles let a client switch complete streaming modes
+                // without changing its normal defaults manually.
+                Label {
+                    width: parent.width
+                    text: qsTr("Streaming Profiles")
+                    font.pointSize: 12
+                    font.bold: true
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: 8
+
+                    TextField {
+                        id: streamingProfileName
+                        width: Math.max(150, parent.width * 0.45)
+                        placeholderText: qsTr("Profile name (for example, Living Room 4K)")
+                        maximumLength: 64
+                        selectByMouse: true
+                    }
+
+                    Button {
+                        text: qsTr("Save Current")
+                        enabled: streamingProfileName.text.trim().length > 0
+                        onClicked: {
+                            if (StreamingProfileManager.saveProfile(streamingProfileName.text)) {
+                                streamingProfileSelector.model = StreamingProfileManager.profileNames
+                                streamingProfileSelector.currentIndex = streamingProfileSelector.find(streamingProfileName.text.trim())
+                            }
+                        }
+                    }
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: 8
+
+                    AutoResizingComboBox {
+                        id: streamingProfileSelector
+                        width: Math.max(150, parent.width * 0.45)
+                        model: StreamingProfileManager.profileNames
+                        onActivated: {
+                            if (currentIndex >= 0) {
+                                StreamingProfileManager.loadProfile(currentText)
+                            }
+                        }
+                    }
+
+                    Button {
+                        text: qsTr("Load")
+                        enabled: streamingProfileSelector.currentIndex >= 0
+                        onClicked: StreamingProfileManager.loadProfile(streamingProfileSelector.currentText)
+                    }
+
+                    Button {
+                        text: qsTr("Delete")
+                        enabled: streamingProfileSelector.currentIndex >= 0
+                        onClicked: {
+                            var deletedName = streamingProfileSelector.currentText
+                            if (StreamingProfileManager.deleteProfile(deletedName)) {
+                                streamingProfileSelector.model = StreamingProfileManager.profileNames
+                                streamingProfileSelector.currentIndex = -1
+                            }
+                        }
+                    }
+                }
+
+                Connections {
+                    target: StreamingProfileManager
+                    function onProfilesChanged() {
+                        var selected = streamingProfileSelector.currentText
+                        streamingProfileSelector.model = StreamingProfileManager.profileNames
+                        streamingProfileSelector.currentIndex = streamingProfileSelector.find(selected)
+                    }
                 }
 
                 // Virtual Display Control
