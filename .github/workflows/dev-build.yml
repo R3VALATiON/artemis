@@ -28,6 +28,9 @@ on:
       - 'fix/**'
   workflow_dispatch:  # Allow manual triggering
 
+permissions:
+  contents: write
+
 env:
   QT_VERSION: '6.8.3'
 
@@ -180,7 +183,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-22.04]
+        os: [macos-15, ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -193,7 +196,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ env.QT_VERSION }}
-          host: ${{ matrix.os == 'macos-latest' && 'mac' || 'linux' }}
+          host: ${{ matrix.os == 'macos-15' && 'mac' || 'linux' }}
           target: 'desktop'
           modules: 'qtmultimedia'
 
@@ -781,7 +784,7 @@ jobs:
   build-macos-dev:
     name: macOS Development Build
     needs: setup-version
-    runs-on: macos-latest
+    runs-on: macos-15
     if: needs.setup-version.outputs.should_build == 'true'
     
     steps:
@@ -1851,7 +1854,8 @@ jobs:
     name: Create Development Release
     needs: [setup-version, build-windows-x64-portable, build-windows-arm64-portable, build-windows-universal-installer, build-macos-dev, build-linux-dev, build-flatpak-dev, build-raspberry-pi-dev]
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && needs.setup-version.outputs.should_build == 'true'  # Create releases for develop/main branches when builds ran
+    # Feature branches publish prereleases only in this fork. always() retains successful artifacts if another platform fails.
+    if: always() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/feature/')) && needs.setup-version.outputs.should_build == 'true'
     
     steps:
     - name: Checkout
@@ -2005,7 +2009,7 @@ jobs:
 
           **✅ Stable**: This release has been tested and is recommended for general use.' || '🚧 **Development Build** 🚧
           
-          This is an automated development build from the `develop` branch.
+          This is an automated development build from the `${{ github.ref_name }}` branch.
           
           **⚠️ Warning**: Development builds are unstable and intended for testing purposes only. Use at your own risk!' }}
           
