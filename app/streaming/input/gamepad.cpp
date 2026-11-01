@@ -730,7 +730,7 @@ void SdlInputHandler::handleControllerDeviceEvent(SDL_ControllerDeviceEvent* eve
             capabilities |= uint16_t(0xec00 | (mode<<8));
             if(mode==3 && m_NativeDualSense) {
                 const char* serial=SDL_GameControllerGetSerial(state->controller);
-                if(Session::get()->nativeDualSense().attach(state->index,QString::fromUtf8(serial ? serial : ""),product) &&
+                if(Session::get()->nativeDualSense().attach(state->index,QString::fromUtf8(serial ? serial : ""),product,QString::fromUtf8(SDL_GameControllerPath(state->controller))) &&
                    !Session::get()->nativeDualSense().isBluetooth()) {
                     // SDL takes the output payload without USB report ID 0x02.
                     uint8_t route[63]={}; route[0]=0xf3; route[4]=0xff; route[5]=0x30; route[7]=0x30;

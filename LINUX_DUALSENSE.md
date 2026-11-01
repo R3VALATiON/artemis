@@ -4,16 +4,18 @@ Maintained by R3VALATiON. Independent experimental fork, not an official release
 
 ## Run
 
+Steam Deck-specific launch and compatibility details are in [STEAM_DECK.md](STEAM_DECK.md).
+
 Linux x86-64, built on Ubuntu 22.04 (glibc 2.35 baseline). Suitable for testing on current x86-64 Linux desktops and Steam Deck desktop mode; SteamOS/Game Mode, Nobara, and other distributions remain hardware-unverified. ARM64 is not included.
 
 For the AppImage:
 
 ```sh
-chmod +x Artemis-Personal-Testing-0.3.0-preview.1-x86_64.AppImage
-./Artemis-Personal-Testing-0.3.0-preview.1-x86_64.AppImage
+chmod +x Artemis-SteamDeck-Personal-Testing-0.3.1-preview.1-x86_64.AppImage
+./Artemis-SteamDeck-Personal-Testing-0.3.1-preview.1-x86_64.AppImage
 ```
 
-If FUSE is unavailable, use `./Artemis-Personal-Testing-0.3.0-preview.1-x86_64.AppImage --appimage-extract-and-run`, or extract the portable `.tar.gz` and run `./AppRun` inside its folder. The archive contains the same application and bundled dependencies.
+If FUSE is unavailable, use `./Artemis-SteamDeck-Personal-Testing-0.3.1-preview.1-x86_64.AppImage --appimage-extract-and-run`, or extract the portable `.tar.gz` and run `./AppRun` inside its folder. The archive contains the same application and bundled dependencies.
 
 The preview uses a separate settings identity, **Artemis DS Personal Test**, and does not automatically update from upstream. No root access is needed to launch it.
 

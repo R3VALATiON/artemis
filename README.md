@@ -4,7 +4,7 @@
 >
 > Independent experimental fork, not an official release of Artemis or its upstream projects. No upstream endorsement is implied. Physical DualSense behavior is unverified.
 
-Linux native DualSense preview: see [setup, supported paths and limitations](LINUX_DUALSENSE.md) and [changelog](CHANGELOG_LINUX.md). Implemented on `linux/native-dualsense-preview`; original Windows V2 work is preserved on its existing branch.
+Linux native DualSense preview: see [setup, supported paths and limitations](LINUX_DUALSENSE.md) and [changelog](CHANGELOG_LINUX.md). Steam Deck revision: [setup and compatibility scope](STEAM_DECK.md). Implemented on `linux/steamdeck-dualsense-preview`; original Windows V2 work is preserved on its existing branch.
 
 ---
 

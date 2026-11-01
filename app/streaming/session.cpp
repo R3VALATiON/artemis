@@ -279,6 +279,7 @@ void Session::cycleNativeFeedback() {
 
 void Session::applyNativeFeedbackCycle() {
     m_Preferences->nativeFeedbackMode=(m_Preferences->nativeFeedbackMode+1)%3;
+    emit m_Preferences->nativeFeedbackModeChanged();
     m_Preferences->save();
     const char* names[]={"Automatic", "Always on", "Off"};
     SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Native DualSense traffic: %s",names[m_Preferences->nativeFeedbackMode]);
@@ -2200,7 +2201,7 @@ void Session::execInternal()
     SDL_Event event;
     for (;;) {
         m_NativeDualSense.tick(m_Preferences->nativeFeedbackMode,m_Preferences->nativeDualSense,
-                              m_StreamConfig.bitrate,m_NativeConnectionPoor.load(),SDL_GetTicks64());
+                              m_StreamConfig.bitrate,m_NativeConnectionPoor.load(),NativeDualSense::clockMs());
 #if SDL_VERSION_ATLEAST(2, 0, 18) && !defined(STEAM_LINK)
         // SDL 2.0.18 has a proper wait event implementation that uses platform
         // support to block on events rather than polling on Windows, macOS, X11,

@@ -11,7 +11,8 @@
 class NativeDualSense {
 public:
     ~NativeDualSense();
-    bool attach(int controller, const QString& serial, unsigned product);
+    bool attach(int controller, const QString& serial, unsigned product, const QString& devicePath);
+    static uint64_t clockMs();
     void detach(int controller);
     void stop();
     void tick(int mode, bool master, int bitrate, bool poor, uint64_t now);

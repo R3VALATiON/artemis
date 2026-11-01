@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cerrno>
+#include <time.h>
 #endif
 extern "C" int LiSendRawControlStreamPacket(uint16_t, const void*, int);
 
@@ -27,13 +28,27 @@ QString normalSerial(QString s) { return s.remove(':').remove('-').toLower(); }
 }
 NativeDualSense::~NativeDualSense() { stop(); }
 
-bool NativeDualSense::attach(int index, const QString& serial, unsigned product) {
+uint64_t NativeDualSense::clockMs() {
+#ifdef Q_OS_LINUX
+    timespec t{};
+    if(clock_gettime(CLOCK_BOOTTIME,&t)==0) return uint64_t(t.tv_sec)*1000+uint64_t(t.tv_nsec)/1000000;
+#endif
+    return SDL_GetTicks64();
+}
+
+bool NativeDualSense::attach(int index, const QString& serial, unsigned product, const QString& devicePath) {
     QMutexLocker lock(&mutex);
     if (controller >= 0) return false; // Never route a second pad's feedback to the first.
 #ifdef Q_OS_LINUX
     QStringList candidates;
     const auto ids = QDir("/sys/class/hidraw").entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    const bool directHidPath=devicePath.startsWith("/dev/hidraw");
+    if(!directHidPath && serial.isEmpty()) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Native DualSense needs a unique physical path or serial");
+        return false;
+    }
     for (const QString& node : ids) {
+        if(directHidPath && devicePath!="/dev/"+node) continue;
         const QString text = readText("/sys/class/hidraw/"+node+"/device/uevent");
         QString id, unique;
         for (const QString& line : text.split('\n')) {
@@ -46,6 +61,7 @@ bool NativeDualSense::attach(int index, const QString& serial, unsigned product)
         if (!serial.isEmpty() && normalSerial(unique)!=normalSerial(serial)) continue;
         candidates << "/dev/"+node;
     }
+    if(candidates.size()>1) return false;
     if (candidates.size()==1) {
         hid=::open(candidates[0].toLocal8Bit().constData(),O_WRONLY|O_NONBLOCK|O_CLOEXEC);
         if (hid<0) {
@@ -106,7 +122,7 @@ bool NativeDualSense::attach(int index, const QString& serial, unsigned product)
         SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"DualSense native USB audio unavailable: %s",snd_strerror(result));
     }
 #else
-    Q_UNUSED(index); Q_UNUSED(serial); Q_UNUSED(product);
+    Q_UNUSED(index); Q_UNUSED(serial); Q_UNUSED(product); Q_UNUSED(devicePath);
 #endif
     return false;
 }
@@ -165,6 +181,11 @@ void NativeDualSense::detach(int index) {
 
 void NativeDualSense::tick(int mode,bool master,int bitrate,bool poor,uint64_t now) {
     QMutexLocker lock(&mutex);
+    // CLOCK_BOOTTIME includes suspend: never reuse an expired host lease or
+    // buffered waveform after waking a handheld.
+    if(lastTick && now-lastTick>6000) {
+        silence(); policy.reset(); ackEnabled=false; lastAck=lastSend=0;
+    }
     if(lastTick && now-lastTick<500) return;
     lastTick=now;
     uint32_t rtt=0,variance=0;
@@ -182,13 +203,13 @@ void NativeDualSense::tick(int mode,bool master,int bitrate,bool poor,uint64_t n
 void NativeDualSense::acknowledge(const uint8_t* p) {
     QMutexLocker lock(&mutex);
     if(p[0]!=0x50 || p[1]!=1 || p[3]!=0 || uint16_t(p[4]|(p[5]<<8))!=requestId) return;
-    ackEnabled=p[2]!=0; lastAck=SDL_GetTicks64();
+    ackEnabled=p[2]!=0; lastAck=clockMs();
 }
 void NativeDualSense::receive(unsigned index,unsigned seq,unsigned frames,unsigned channels,
                              const uint8_t* pcm,unsigned length) {
     if(!pcm || !DualSenseWire::validPcm(index,frames,channels,length)) return;
     QMutexLocker lock(&mutex);
-    const auto now=SDL_GetTicks64();
+    const auto now=clockMs();
     if(int(index)!=controller || !requested || !ackEnabled || !lastAck || now-lastAck>=6000) return;
     if(!haveSequence || now-lastPcm>250) { pending.clear(); expected=uint16_t(seq); haveSequence=true; }
     lastPcm=now;
