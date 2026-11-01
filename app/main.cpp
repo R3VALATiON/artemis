@@ -216,6 +216,8 @@ void qtLogToDiskHandler(QtMsgType type, const QMessageLogContext&, const QString
     QString txt = QString("%1 - Qt %2: %3\n").arg(logTime.toString()).arg(typeTxt).arg(msg);
 
     logToLoggerStream(txt);
+    // Qt aborts immediately after a fatal handler; preserve the startup error.
+    if (type == QtFatalMsg) s_LoggerThread.waitForDone(2000);
 }
 
 #ifdef HAVE_FFMPEG

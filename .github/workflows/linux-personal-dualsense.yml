@@ -101,8 +101,8 @@ jobs:
       - name: Smoke-test bundled client without build-time Qt environment
         run: |
           set -euo pipefail
-          env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
-            QT_QPA_PLATFORM=offscreen ./AppDir/AppRun --help > cli-smoke.log 2>&1
+          xvfb-run -a env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
+            QT_QPA_PLATFORM=xcb ./AppDir/AppRun --help > cli-smoke.log 2>&1
           cat cli-smoke.log
           set +e
           timeout 15 xvfb-run -a env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
@@ -147,3 +147,4 @@ jobs:
           path: |
             *smoke.log
             linuxdeploy*.log
+            release/*.AppImage
