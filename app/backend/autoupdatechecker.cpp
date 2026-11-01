@@ -29,6 +29,8 @@ AutoUpdateChecker::AutoUpdateChecker(QObject *parent) :
 
 void AutoUpdateChecker::start()
 {
+    return; // Personal previews update only through this fork's releases.
+
     if (!m_Nam) {
         Q_ASSERT(m_Nam);
         return;

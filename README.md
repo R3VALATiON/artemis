@@ -1,3 +1,13 @@
+# Artemis Desktop — Personal Development & Testing Fork
+
+> **UNOFFICIAL PERSONAL DEVELOPMENT / TESTING BUILD — R3VALATiON**
+>
+> Independent experimental fork, not an official release of Artemis or its upstream projects. No upstream endorsement is implied. Physical DualSense behavior is unverified.
+
+Linux native DualSense preview: see [setup, supported paths and limitations](LINUX_DUALSENSE.md) and [changelog](CHANGELOG_LINUX.md). Implemented on `linux/native-dualsense-preview`; original Windows V2 work is preserved on its existing branch.
+
+---
+
 > ## Personal-use fork
 >
 > This repository is a personal-use fork of [Artemis Qt](https://github.com/wjbeckett/artemis), with downstream Windows-focused changes and selected functionality brought over from [Artemis Android](https://github.com/ClassicOldSong/moonlight-android).

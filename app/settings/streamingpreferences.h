@@ -129,6 +129,9 @@ public:
     Q_PROPERTY(bool enableVsync MEMBER enableVsync NOTIFY enableVsyncChanged)
     Q_PROPERTY(bool gameOptimizations MEMBER gameOptimizations NOTIFY gameOptimizationsChanged)
     Q_PROPERTY(bool playAudioOnHost MEMBER playAudioOnHost NOTIFY playAudioOnHostChanged)
+    Q_PROPERTY(bool nativeDualSense MEMBER nativeDualSense NOTIFY nativeDualSenseChanged)
+    Q_PROPERTY(int nativeFeedbackMode MEMBER nativeFeedbackMode NOTIFY nativeFeedbackModeChanged)
+    Q_PROPERTY(int controllerEmulationMode MEMBER controllerEmulationMode NOTIFY controllerEmulationModeChanged)
     Q_PROPERTY(bool multiController MEMBER multiController NOTIFY multiControllerChanged)
     Q_PROPERTY(bool enableMdns MEMBER enableMdns NOTIFY enableMdnsChanged)
     Q_PROPERTY(bool quitAppAfter MEMBER quitAppAfter NOTIFY quitAppAfterChanged)
@@ -178,6 +181,9 @@ public:
     bool enableVsync;
     bool gameOptimizations;
     bool playAudioOnHost;
+    bool nativeDualSense;
+    int nativeFeedbackMode; // 0 automatic, 1 always, 2 off
+    int controllerEmulationMode; // 0 auto, 1 Xbox, 2 DS4, 3 DualSense
     bool multiController;
     bool enableMdns;
     bool quitAppAfter;
@@ -217,6 +223,9 @@ public:
     int resolutionScaleFactor;
 
 signals:
+    void nativeDualSenseChanged();
+    void nativeFeedbackModeChanged();
+    void controllerEmulationModeChanged();
     void displayModeChanged();
     void bitrateChanged();
     void unlockBitrateChanged();

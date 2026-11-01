@@ -202,6 +202,8 @@ private:
     Uint32 dragTimerCallback(Uint32 interval, void* param);
 
     SDL_Window* m_Window;
+    bool m_NativeDualSense;
+    int m_ControllerEmulationMode;
     bool m_MultiController;
     bool m_GamepadMouse;
     bool m_SwapMouseButtons;

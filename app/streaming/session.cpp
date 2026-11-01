@@ -73,7 +73,8 @@ CONNECTION_LISTENER_CALLBACKS Session::k_ConnCallbacks = {
     Session::clRumbleTriggers,
     Session::clSetMotionEventState,
     Session::clSetControllerLED,
-    Session::clSetAdaptiveTriggers
+    Session::clSetAdaptiveTriggers,
+    Session::clDualSenseAudio
 };
 
 Session* Session::s_ActiveSession;
@@ -188,6 +189,7 @@ void Session::clConnectionStatusUpdate(int connectionStatus)
                 "Connection status update: %d",
                 connectionStatus);
 
+    s_ActiveSession->m_NativeConnectionPoor.store(connectionStatus == CONN_STATUS_POOR);
     if (!s_ActiveSession->m_Preferences->connectionWarnings) {
         return;
     }
@@ -264,7 +266,33 @@ void Session::clSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g
     SDL_PushEvent(&setControllerLEDEvent);
 }
 
+void Session::clDualSenseAudio(uint16_t controller, uint16_t sequence, uint16_t frames,
+                              uint8_t channels, uint8_t flags, uint8_t* pcm, uint16_t length) {
+    Q_UNUSED(flags);
+    s_ActiveSession->m_NativeDualSense.receive(controller,sequence,frames,channels,pcm,length);
+}
+
+void Session::cycleNativeFeedback() {
+    SDL_Event event={}; event.type=SDL_USEREVENT; event.user.code=106;
+    SDL_PushEvent(&event);
+}
+
+void Session::applyNativeFeedbackCycle() {
+    m_Preferences->nativeFeedbackMode=(m_Preferences->nativeFeedbackMode+1)%3;
+    m_Preferences->save();
+    const char* names[]={"Automatic", "Always on", "Off"};
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Native DualSense traffic: %s",names[m_Preferences->nativeFeedbackMode]);
+    if(m_QuickMenuManager) QMetaObject::invokeMethod(m_QuickMenuManager,"showToast",Qt::QueuedConnection,Q_ARG(QString,QString("Native feedback: ")+names[m_Preferences->nativeFeedbackMode]));
+}
+
 void Session::clSetAdaptiveTriggers(uint16_t controllerNumber, uint8_t eventFlags, uint8_t typeLeft, uint8_t typeRight, uint8_t *left, uint8_t *right){
+    // Metadata is never submitted to the physical controller as trigger effects.
+    if ((eventFlags & 0x40) && typeLeft==0x42 && typeRight==0x57) {
+        s_ActiveSession->m_NativeDualSense.acknowledge(left);
+        return;
+    }
+    if ((eventFlags & 0x40) && typeLeft==0x41 && typeRight==0x45) return;
+
     // We push an event for the main thread to handle in order to properly synchronize
     // with the removal of game controllers that could result in our game controller
     // going away during this callback.
@@ -2171,6 +2199,8 @@ void Session::execInternal()
     // because we want to suspend all Qt processing until the stream is over.
     SDL_Event event;
     for (;;) {
+        m_NativeDualSense.tick(m_Preferences->nativeFeedbackMode,m_Preferences->nativeDualSense,
+                              m_StreamConfig.bitrate,m_NativeConnectionPoor.load(),SDL_GetTicks64());
 #if SDL_VERSION_ATLEAST(2, 0, 18) && !defined(STEAM_LINK)
         // SDL 2.0.18 has a proper wait event implementation that uses platform
         // support to block on events rather than polling on Windows, macOS, X11,
@@ -2238,6 +2268,9 @@ void Session::execInternal()
                                                  (uint8_t)((uintptr_t)event.user.data2 >> 16),
                                                  (uint8_t)((uintptr_t)event.user.data2 >> 8),
                                                  (uint8_t)((uintptr_t)event.user.data2));
+                break;
+            case 106:
+                applyNativeFeedbackCycle();
                 break;
             case SDL_CODE_GAMECONTROLLER_SET_ADAPTIVE_TRIGGERS:
                 m_InputHandler->setAdaptiveTriggers((uint16_t)(uintptr_t)event.user.data1,
@@ -2512,6 +2545,7 @@ void Session::execInternal()
     }
 
 DispatchDeferredCleanup:
+    m_NativeDualSense.stop();
     // Uncapture the mouse and hide the window immediately,
     // so we can return to the Qt GUI ASAP.
     m_InputHandler->setCaptureActive(false);

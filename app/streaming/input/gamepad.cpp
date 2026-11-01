@@ -722,6 +722,28 @@ void SdlInputHandler::handleControllerDeviceEvent(SDL_ControllerDeviceEvent* eve
 #endif
             type == LI_CTYPE_PS;
 
+        const unsigned product=SDL_GameControllerGetProduct(state->controller);
+        const bool sony=SDL_GameControllerGetVendor(state->controller)==0x054c && (product==0x0ce6 || product==0x0df2);
+        if (sony) {
+            int mode=m_ControllerEmulationMode ? m_ControllerEmulationMode : 3;
+            if(!m_NativeDualSense && mode==3) mode=2;
+            capabilities |= uint16_t(0xec00 | (mode<<8));
+            if(mode==3 && m_NativeDualSense) {
+                const char* serial=SDL_GameControllerGetSerial(state->controller);
+                if(Session::get()->nativeDualSense().attach(state->index,QString::fromUtf8(serial ? serial : ""),product) &&
+                   !Session::get()->nativeDualSense().isBluetooth()) {
+                    // SDL takes the output payload without USB report ID 0x02.
+                    uint8_t route[63]={}; route[0]=0xf3; route[4]=0xff; route[5]=0x30; route[7]=0x30;
+                    SDL_GameControllerSendEffect(state->controller,route,sizeof(route));
+                    SDL_Delay(40);
+                    uint8_t music[63]={}; music[0]=0xe0; music[4]=0x7f; music[5]=0x30; music[6]=0x40; music[7]=0x30;
+                    SDL_GameControllerSendEffect(state->controller,music,sizeof(music));
+                    SDL_Delay(35);
+                    uint8_t wake[63]={}; wake[1]=0x14; wake[38]=3; wake[41]=2; wake[43]=0x24;
+                    SDL_GameControllerSendEffect(state->controller,wake,sizeof(wake));
+                }
+            }
+        }
         LiSendControllerArrivalEvent(state->index, m_GamepadMask, type, supportedButtonFlags, capabilities);
 #else
 
@@ -742,6 +764,7 @@ void SdlInputHandler::handleControllerDeviceEvent(SDL_ControllerDeviceEvent* eve
                 SDL_RemoveTimer(state->mouseEmulationTimer);
             }
 
+            Session::get()->nativeDualSense().detach(state->index);
             SDL_GameControllerClose(state->controller);
 
 #if !SDL_VERSION_ATLEAST(2, 0, 9)
@@ -918,7 +941,7 @@ void SdlInputHandler::setAdaptiveTriggers(uint16_t controllerNumber, DualSenseOu
 
 #if SDL_VERSION_ATLEAST(2, 0, 16)
         // Make sure the controller number is within our supported count
-    if (controllerNumber <= MAX_GAMEPADS &&
+    if (controllerNumber < MAX_GAMEPADS &&
         // and we have a valid controller
         m_GamepadState[controllerNumber].controller != nullptr &&
         // and it's a PS5 controller

@@ -1,0 +1,4 @@
+# Optional native Bluetooth output access for the active local desktop user.
+# Copy to /etc/udev/rules.d/, reload rules, then reconnect the controller.
+SUBSYSTEM=="hidraw", KERNEL=="hidraw*", KERNELS=="0005:054C:0CE6.*", TAG+="uaccess"
+SUBSYSTEM=="hidraw", KERNEL=="hidraw*", KERNELS=="0005:054C:0DF2.*", TAG+="uaccess"

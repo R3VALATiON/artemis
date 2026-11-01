@@ -1689,6 +1689,26 @@ Flickable {
                 spacing: 5
 
                 CheckBox {
+                    width: parent.width
+                    text: qsTr("Native DualSense emulation (personal testing preview)")
+                    checked: StreamingPreferences.nativeDualSense
+                    onCheckedChanged: StreamingPreferences.nativeDualSense = checked
+                }
+                Label { width: parent.width; wrapMode: Text.WordWrap; text: qsTr("Emulation changes require reconnecting and may require restarting the game. One native DualSense per stream.") }
+                AutoResizingComboBox {
+                    width: parent.width
+                    model: [qsTr("Controller: Automatic"),qsTr("Controller: Xbox"),qsTr("Controller: DualShock 4"),qsTr("Controller: DualSense")]
+                    currentIndex: StreamingPreferences.controllerEmulationMode
+                    onActivated: StreamingPreferences.controllerEmulationMode = currentIndex
+                }
+                AutoResizingComboBox {
+                    width: parent.width
+                    model: [qsTr("Native audio / HD haptics: Automatic"),qsTr("Native audio / HD haptics: Always on"),qsTr("Native audio / HD haptics: Off")]
+                    currentIndex: StreamingPreferences.nativeFeedbackMode
+                    onActivated: StreamingPreferences.nativeFeedbackMode = currentIndex
+                }
+                Label { width: parent.width; wrapMode: Text.WordWrap; text: qsTr("Automatic needs at least 12 Mbps configured video bitrate and 20 stable seconds. Poor connectivity or latency of 150 ms pauses native traffic; recovery requires latency below 120 ms. Inputs, ordinary rumble and adaptive triggers continue.") }
+                CheckBox {
                     id: swapFaceButtonsCheck
                     width: parent.width
                     text: qsTr("Swap A/B and X/Y gamepad buttons")

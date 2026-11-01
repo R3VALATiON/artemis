@@ -10,7 +10,9 @@
 #include <QGuiApplication>
 
 SdlInputHandler::SdlInputHandler(StreamingPreferences& prefs, int streamWidth, int streamHeight)
-    : m_MultiController(prefs.multiController),
+    : m_NativeDualSense(prefs.nativeDualSense),
+      m_ControllerEmulationMode(prefs.controllerEmulationMode),
+      m_MultiController(prefs.multiController),
       m_GamepadMouse(prefs.gamepadMouse),
       m_SwapMouseButtons(prefs.swapMouseButtons),
       m_ReverseScrollDirection(prefs.reverseScrollDirection),

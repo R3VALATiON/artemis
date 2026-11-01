@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QSemaphore>
+#include <atomic>
+#include "nativedualsense.h"
 #include <QWindow>
 
 #include <Limelight.h>
@@ -143,6 +145,8 @@ public:
         return m_OverlayManager;
     }
 
+    NativeDualSense& nativeDualSense() { return m_NativeDualSense; }
+    void cycleNativeFeedback();
     void flushWindowEvents();
 
     void setShouldExitAfterQuit();
@@ -272,6 +276,10 @@ private:
     static
     int drSubmitDecodeUnit(PDECODE_UNIT du);
 
+    void applyNativeFeedbackCycle();
+    NativeDualSense m_NativeDualSense;
+    std::atomic<bool> m_NativeConnectionPoor{false};
+    static void clDualSenseAudio(uint16_t controller, uint16_t sequence, uint16_t frames, uint8_t channels, uint8_t flags, uint8_t* pcm, uint16_t length);
     StreamingPreferences* m_Preferences;
     bool m_IsFullScreen;
     SupportedVideoFormatList m_SupportedVideoFormats; // Sorted in order of descending priority

@@ -245,6 +245,12 @@ Rectangle {
             description: qsTr("Fetch clipboard from server")
         }
         ListElement {
+            text: qsTr("Cycle Native DualSense Feedback")
+            icon: "🎮"
+            action: "native_feedback"
+            description: qsTr("Automatic / Always on / Off (controller audio and HD haptics)")
+        }
+        ListElement {
             text: qsTr("Toggle Performance Stats")
             icon: "📊"
             action: "toggle_stats"

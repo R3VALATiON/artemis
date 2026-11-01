@@ -136,6 +136,9 @@ void StreamingPreferences::reload()
     enableVsync = settings.value(SER_VSYNC, true).toBool();
     gameOptimizations = settings.value(SER_GAMEOPTS, true).toBool();
     playAudioOnHost = settings.value(SER_HOSTAUDIO, false).toBool();
+    nativeDualSense = settings.value("nativeDualSense", true).toBool();
+    nativeFeedbackMode = qBound(0, settings.value("nativeFeedbackMode", 0).toInt(), 2);
+    controllerEmulationMode = qBound(0, settings.value("controllerEmulationMode", 0).toInt(), 3);
     multiController = settings.value(SER_MULTICONT, true).toBool();
     enableMdns = settings.value(SER_MDNS, true).toBool();
     quitAppAfter = settings.value(SER_QUITAPPAFTER, false).toBool();
@@ -364,6 +367,9 @@ void StreamingPreferences::save()
     settings.setValue(SER_VSYNC, enableVsync);
     settings.setValue(SER_GAMEOPTS, gameOptimizations);
     settings.setValue(SER_HOSTAUDIO, playAudioOnHost);
+    settings.setValue("nativeDualSense", nativeDualSense);
+    settings.setValue("nativeFeedbackMode", nativeFeedbackMode);
+    settings.setValue("controllerEmulationMode", controllerEmulationMode);
     settings.setValue(SER_MULTICONT, multiController);
     settings.setValue(SER_MDNS, enableMdns);
     settings.setValue(SER_QUITAPPAFTER, quitAppAfter);

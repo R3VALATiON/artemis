@@ -132,7 +132,9 @@ void QuickMenuManager::executeAction(const QString &action)
 {
     qDebug() << "QuickMenuManager: Executing action:" << action;
     
-    if (action == "disconnect") {
+    if (action == "native_feedback") {
+        if (Session::get()) Session::get()->cycleNativeFeedback();
+    } else if (action == "disconnect") {
         disconnect();
     } else if (action == "quit") {
         quit();

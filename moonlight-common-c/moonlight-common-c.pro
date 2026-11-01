@@ -56,7 +56,7 @@ SOURCES += \
     $$COMMON_C_DIR/src/ByteBuffer.c \
     $$COMMON_C_DIR/src/Connection.c \
     $$COMMON_C_DIR/src/ConnectionTester.c \
-    $$COMMON_C_DIR/src/ControlStream.c \
+    $$PWD/control_stream_extended.c \
     $$COMMON_C_DIR/src/FakeCallbacks.c \
     $$COMMON_C_DIR/src/InputStream.c \
     $$COMMON_C_DIR/src/LinkedBlockingQueue.c \

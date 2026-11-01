@@ -1,5 +1,5 @@
 QT += core quick network quickcontrols2 svg
-CONFIG += c++11
+CONFIG += c++17
 
 unix:!macx {
     TARGET = artemis
@@ -172,6 +172,10 @@ macx {
 
     CONFIG += ffmpeg soundio
 }
+
+SOURCES += streaming/nativedualsense.cpp
+HEADERS += streaming/nativedualsense.h streaming/nativefeedbackpolicy.h streaming/dualsensewire.h
+unix:!macx { PKGCONFIG += alsa }
 
 SOURCES += \
     backend/nvaddress.cpp \
