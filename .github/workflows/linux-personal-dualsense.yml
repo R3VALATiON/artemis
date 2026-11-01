@@ -3,7 +3,8 @@ run-name: "UNOFFICIAL Linux DualSense personal testing #${{ github.run_number }}
 on:
   workflow_dispatch:
   push:
-    branches: [linux/native-dualsense-preview]
+    branches: [develop, linux/native-dualsense-preview]
+    paths: [".github/workflows/linux-personal-dualsense.yml", "app/**", "moonlight-common-c/**", "tests/native-feedback/**", "packaging/linux-personal/**", ".gitmodules", "LINUX_DUALSENSE.md", "CHANGELOG_LINUX.md"]
 permissions:
   contents: write
 concurrency:
@@ -20,6 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: linux/native-dualsense-preview
           submodules: recursive
       - name: Test feedback protocol and quality policy
         run: |
@@ -73,7 +75,7 @@ jobs:
           cat > BUILD_INFO.md <<INFO
           # UNOFFICIAL PERSONAL DEVELOPMENT / TESTING PREVIEW
           Repository: $GITHUB_REPOSITORY
-          Revision: $GITHUB_SHA
+          Revision: $(git rev-parse HEAD)
           Release: $TAG
           Upstream app version: 0.6.7; personal app version: 0.6.7-personal-dev.0.3.0
           Architecture: Linux x86-64; Ubuntu 22.04 / glibc 2.35 baseline
@@ -134,7 +136,7 @@ jobs:
             echo 'Release exists; refusing to replace published binaries.'
             exit 1
           fi
-          gh release create "$TAG" release/* --target "$GITHUB_SHA" --prerelease --latest=false \
+          gh release create "$TAG" release/* --target "$(git rev-parse HEAD)" --prerelease --latest=false \
             --title 'Artemis Linux 0.3.0 Preview 1 — Unofficial Personal Development & Testing' \
             --notes-file CHANGELOG_LINUX.md
       - name: Preserve failure diagnostics
