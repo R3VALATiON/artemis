@@ -1,3 +1,28 @@
+# Artemis Qt — Personal Development & Testing Fork
+
+> **UNOFFICIAL PERSONAL DEVELOPMENT / TESTING BUILD — R3VALATiON**
+>
+> Independent experimental fork. These builds are not official Artemis, Apollo, Extended, Moonlight, Sunshine or Valve releases; no upstream endorsement is implied. Physical controller and Steam Deck validation remain outstanding.
+
+## Personal Linux downloads
+
+| Version | Target | Downloads and changelog |
+| --- | --- | --- |
+| **0.3.1 Preview 1** | Steam Deck / Linux x86-64; SteamOS 3.9.5 stable compatibility target | [Steam Deck prerelease](https://github.com/R3VALATiON/artemis/releases/tag/v0.3.1-steamdeck-personal-preview.1) |
+| 0.3.0 Preview 1 | Initial Linux x86-64 port | [Linux prerelease](https://github.com/R3VALATiON/artemis/releases/tag/v0.3.0-linux-personal-preview.1) |
+
+Both contain an AppImage and portable archive, build provenance, checksums and personal-testing notices. **For Steam Deck, use the 0.3.1 portable archive**, extract it into a permanent home folder and run `./install-steamdeck.sh`. Add its menu entry to Steam as a non-Steam game and leave Proton/forced compatibility tools off.
+
+The Linux port includes native DualSense emulation controls and Automatic / Always on / Off native audio/HD-haptics traffic negotiation with the [matching personal Apollo Windows v0.2.0 preview](https://github.com/R3VALATiON/Apollo-Extended/releases/tag/v0.2.0-personal-preview.1). One native DualSense per stream; microphone forwarding and automatic controller-jack routing are not included.
+
+The Steam Deck revision passed protocol/policy tests, a packaged-ELF dependency/ABI audit, and X11/native Wayland UI startup checks at 1280×800. See the attached compatibility report and [Steam Deck guide](https://github.com/R3VALATiON/artemis/blob/linux/steamdeck-dualsense-preview/STEAM_DECK.md). These checks do not establish physical GPU/controller behavior, real gamescope operation, or Valve certification. Run `./check-steamdeck.sh` in the extracted folder for a read-only check on the actual Deck.
+
+Source branches: [Linux port](https://github.com/R3VALATiON/artemis/tree/linux/native-dualsense-preview) and [Steam Deck revision](https://github.com/R3VALATiON/artemis/tree/linux/steamdeck-dualsense-preview). Existing Windows V2 work and releases are preserved. All development stays in this personal fork; no upstream pull request is part of this work.
+
+---
+
+## Upstream reference documentation
+
 # Artemis Qt
 
 [Artemis Qt](https://github.com/wjbeckett/artemis) is an enhanced cross-platform client for NVIDIA GameStream and [Apollo](https://github.com/ClassicOldSong/Apollo)/[Sunshine](https://github.com/LizardByte/Sunshine) servers. It brings the advanced features from [Artemis Android](https://github.com/ClassicOldSong/moonlight-android) to desktop platforms.
