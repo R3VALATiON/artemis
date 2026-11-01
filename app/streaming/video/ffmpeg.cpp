@@ -1429,6 +1429,21 @@ bool FFmpegVideoDecoder::isDecoderMatchForParams(const AVCodec *decoder, PDECODE
     }
 #endif
 
+#ifdef Q_OS_LINUX
+    // FFmpeg 4.4 CUVID probes can crash during failed AV1 initialization when
+    // libnvcuvid is absent. Non-NVIDIA clients (including Steam Deck) must not
+    // instantiate those decoders just because FFmpeg was built with them.
+    if (QString::fromUtf8(decoder->name).endsWith("_cuvid")) {
+        static const bool haveCuvid = []() {
+            void* runtime=SDL_LoadObject("libnvcuvid.so.1");
+            if (!runtime) return false;
+            SDL_UnloadObject(runtime);
+            return true;
+        }();
+        if (!haveCuvid) return false;
+    }
+#endif
+
     return ((params->videoFormat & VIDEO_FORMAT_MASK_H264) && decoder->id == AV_CODEC_ID_H264) ||
            ((params->videoFormat & VIDEO_FORMAT_MASK_H265) && decoder->id == AV_CODEC_ID_HEVC) ||
            ((params->videoFormat & VIDEO_FORMAT_MASK_AV1)  && decoder->id == AV_CODEC_ID_AV1);

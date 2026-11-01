@@ -37,7 +37,7 @@ jobs:
             libglu1-mesa-dev libibus-1.0-dev libpulse-dev libudev-dev libx11-dev libxcursor-dev \
             libxext-dev libxi-dev libxinerama-dev libxrandr-dev libxss-dev libxt-dev libxv-dev \
             libxxf86vm-dev libxcb-dri3-dev libx11-xcb-dev libplacebo-dev libxcb-cursor0 \
-            xvfb patchelf desktop-file-utils libfuse2
+            xvfb patchelf desktop-file-utils libfuse2 gdb
       - uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
@@ -106,7 +106,7 @@ jobs:
           cat cli-smoke.log
           set +e
           timeout 15 xvfb-run -a env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
-            QT_QUICK_BACKEND=software ./AppDir/AppRun > ui-smoke.log 2>&1
+            QT_QPA_PLATFORM=xcb QT_QUICK_BACKEND=software ./AppDir/AppRun > ui-smoke.log 2>&1
           result=$?
           set -e
           cat ui-smoke.log
@@ -139,6 +139,15 @@ jobs:
           gh release create "$TAG" release/* --target "$(git rev-parse HEAD)" --prerelease --latest=false \
             --title 'Artemis Linux 0.3.0 Preview 1 — Unofficial Personal Development & Testing' \
             --notes-file CHANGELOG_LINUX.md
+      - name: Capture startup backtrace on failure
+        if: failure()
+        continue-on-error: true
+        run: |
+          if [ -f AppDir/usr/bin/artemis ]; then
+            timeout 30 xvfb-run -a env QT_QPA_PLATFORM=xcb QT_QUICK_BACKEND=software \
+              gdb --batch -ex run -ex 'thread apply all bt' --args AppDir/usr/bin/artemis > startup-backtrace.log 2>&1 || true
+            tail -100 startup-backtrace.log
+          fi
       - name: Preserve failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -146,5 +155,6 @@ jobs:
           name: Linux-personal-preview-failure-logs
           path: |
             *smoke.log
+            startup-backtrace.log
             linuxdeploy*.log
             release/*.AppImage
