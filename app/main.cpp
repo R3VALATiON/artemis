@@ -830,6 +830,7 @@ int main(int argc, char *argv[])
         engine.load(QUrl(QStringLiteral("qrc:/gui/main.qml")));
         if (engine.rootObjects().isEmpty())
             return -1;
+        qInfo() << "Personal preview UI ready:" << QGuiApplication::platformName();
     }
 
     int err = app.exec();

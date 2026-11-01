@@ -135,6 +135,7 @@ jobs:
           result=$?
           set -e
           cat ui-smoke.log
+          grep -q "Personal preview UI ready" ui-smoke.log
           test "$result" -eq 124
           if grep -E 'QQmlApplicationEngine failed|module .* is not installed|error while loading shared libraries|Cannot load library|failed to load component' ui-smoke.log; then exit 1; fi
       - name: Smoke-test native Wayland UI at Steam Deck resolution
@@ -154,6 +155,7 @@ jobs:
           result=$?
           set -e
           cat wayland-smoke.log
+          grep -q "Personal preview UI ready" wayland-smoke.log
           test "$result" -eq 124
           if grep -E 'QQmlApplicationEngine failed|module .* is not installed|error while loading shared libraries|Cannot load library|failed to load component' wayland-smoke.log; then exit 1; fi
       - name: Finish release assets and provenance
