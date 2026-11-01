@@ -313,6 +313,11 @@ LONG WINAPI UnhandledExceptionHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
 int main(int argc, char *argv[])
 {
     SDL_SetMainReady();
+#ifdef Q_OS_LINUX
+    // Qt owns the GUI loop. SDL's signal-to-event bridge is not pumped when
+    // no gamepad is attached, so it can otherwise swallow Steam/OS SIGTERM.
+    SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
+#endif
 
     // Set the app version for the QCommandLineParser's showVersion() command
     QCoreApplication::setApplicationVersion(VERSION_STR);

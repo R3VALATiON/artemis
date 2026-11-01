@@ -21,6 +21,7 @@ Steam Deck revision of the Linux native DualSense preview, retaining the desktop
 - Provide a read-only on-Deck preflight and a versioned official SteamOS repository reference.
 - Include suspend time in feedback lease deadlines; silence and renegotiate after a long heartbeat gap.
 - Identify a native controller by its physical HID path as well as serial; refuse ambiguous output routes.
+- Let Qt retain normal Linux signal handling so Steam/OS termination is not swallowed when SDL controller polling is inactive; bound smoke-test shutdown deadlines.
 - Skip NVIDIA CUVID decoder probing when its runtime is absent, avoiding an inherited Linux startup crash.
 
 Read STEAM_DECK.md and the attached compatibility audit. The software checks are not a booted SteamOS or physical Deck test, and do not constitute Valve certification.

@@ -130,7 +130,7 @@ jobs:
             QT_QPA_PLATFORM=xcb ./AppDir/AppRun --help > cli-smoke.log 2>&1
           cat cli-smoke.log
           set +e
-          timeout 15 xvfb-run -a -s "-screen 0 1280x800x24" env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
+          timeout --kill-after=5s 15s xvfb-run -a -s "-screen 0 1280x800x24" env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
             QT_QPA_PLATFORM=xcb QT_QUICK_BACKEND=software ./AppDir/AppRun > ui-smoke.log 2>&1
           result=$?
           set -e
@@ -148,7 +148,7 @@ jobs:
           for attempt in $(seq 1 50); do test -S "$XDG_RUNTIME_DIR/wayland-artemis" && break; sleep 0.1; done
           test -S "$XDG_RUNTIME_DIR/wayland-artemis"
           set +e
-          timeout 15 env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
+          timeout --kill-after=5s 15s env -u LD_LIBRARY_PATH -u QT_PLUGIN_PATH -u QML_IMPORT_PATH -u QML2_IMPORT_PATH \
             WAYLAND_DISPLAY=wayland-artemis QT_QPA_PLATFORM=wayland SDL_VIDEODRIVER=wayland QT_QUICK_BACKEND=software \
             ./AppDir/steamdeck-launch.sh > wayland-smoke.log 2>&1
           result=$?
@@ -189,7 +189,7 @@ jobs:
         continue-on-error: true
         run: |
           if [ -f AppDir/usr/bin/artemis ]; then
-            timeout 30 xvfb-run -a -s "-screen 0 1280x800x24" env QT_QPA_PLATFORM=xcb QT_QUICK_BACKEND=software \
+            timeout --kill-after=5s 30s xvfb-run -a -s "-screen 0 1280x800x24" env QT_QPA_PLATFORM=xcb QT_QUICK_BACKEND=software \
               gdb --batch -ex run -ex 'thread apply all bt' --args AppDir/usr/bin/artemis > startup-backtrace.log 2>&1 || true
             tail -100 startup-backtrace.log
           fi
